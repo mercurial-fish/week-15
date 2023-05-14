@@ -1,16 +1,25 @@
+//NOTE - Imports functions, css, and Bootstrap
+
 import './App.css';
+import "../node_modules/bootstrap/dist/css/bootstrap.css"
 import { useEffect, useState } from 'react';
+import ListOfBooks from './Components/ListOfBooks';
+import NewBookForm from './Components/NewBookForm';
+import UpdateBook from './Components/UpdateBook';
 
 function App() {
 
   const BOOKS_API = "https://6441e96533997d3ef904aac0.mockapi.io/CRUD_App_API/books";
-  
+
+
   const [books, setBooks] = useState([]);
-  
+
+
   const [newTitle, setNewTitle] = useState("")
   const [newAuthor, setNewAuthor] = useState("")
   const [newGenre, setNewGenre] = useState("")
   
+  const [bookId, setBookId] = useState("")
   const [updatedTitle, setUpdatedTitle] = useState("")
   const [updatedAuthor, setUpdatedAuthor] = useState("")
   const [updatedGenre, setUpdatedGenre] = useState("")
@@ -20,20 +29,22 @@ function App() {
     console.log(books)
   }, [])
   
-  
-  
+  //NOTE - fetches data from API to be used to create the booklist
+
   function getBooks(){
     fetch(BOOKS_API)
       .then((data) => data.json())
       .then((data) => setBooks(data))
   }
   
+  //NOTE - based on the id of the item, deletes said item and re-renders the remaining items from API
   function deleteBook(id) {
     fetch(`${BOOKS_API}/${id}`, {
       method: "DELETE"
     }).then(() => getBooks())
   }
   
+  //NOTE - adds book to the array and re-renders
   function addBook(e) {
     e.preventDefault();
   
@@ -49,23 +60,23 @@ function App() {
       })
     }).then(() => getBooks())
   }
-  
-  function updateBook(e, bookObject) {
+
+  //NOTE - calls upon the book by id and then updates the info
+  function updateBook(e) {
     e.preventDefault();
+    let id = bookId
   
-    let updatedBookObject = {
-      ...bookObject,
-      title: updatedTitle,
-      author: updatedAuthor,
-      genre: updatedGenre 
-    }
-  
-    fetch(`${BOOKS_API}/${bookObject.id}`, {
+    fetch(`${BOOKS_API}/${id}`, {
       method: "PUT",
       headers: {
       "Content-Type": "application/json",
       },
-      body: JSON.stringify(updatedBookObject)
+      body: JSON.stringify({
+
+        title: updatedTitle,
+        author: updatedAuthor,
+        genre: updatedGenre 
+      })
     }).then(() => getBooks())
   }
   
@@ -73,59 +84,23 @@ function App() {
   
     return (
       <>
-      <div>
-        {<form>
-          <h3>New Book</h3>
-          <label>Title</label>
-          <input 
-            type='text'
-            onChange={(e) => setNewTitle(e.target.value)} />
-          <label>Author</label>
-          <input
-            type='text'
-            onChange={(e) => setNewAuthor(e.target.value)} />
-          <label>Genre</label>
-          <input 
-            type='text'
-            onChange={(e) => setNewGenre(e.target.value)} />
-          <button type='submit' onClick={(e) => addBook(e)}>Create</button>
-        </form>}
-        </div>
-        
-        <div>
-        {books.map((book, index) => (
-          <div key={index}>
-            <div>
-              Title: {book.title}
-              Author: {book.author}
-              Genre: {book.genre}
-            </div>
-            <button onClick={() => deleteBook(book.id)}>Delete</button>
-            <form>
-            <h3>Update Book</h3>
-            <label>Title</label>
-              <input
-              type='text'
-              onChange={(e) => setUpdatedTitle(e.target.value)} />
-            <label>Author</label>
-              <input 
-                type='text'
-                onChange={(e) => setUpdatedAuthor(e.target.value)} />
-            <label>Genre</label>
-              <input
-                type='text'
-                onChange={(e) => setUpdatedGenre(e.target.value)} />
-          <button type='submit' onClick={(e) => updateBook(e, book)}>Update</button>
-  
-            </form>
-          </div>
-        ))}
-        </div>
+      <NewBookForm 
+        setNewTitle={setNewTitle} 
+        setNewAuthor={setNewAuthor} 
+        setNewGenre={setNewGenre} 
+        addBook={addBook} />
+      <UpdateBook
+        setBookId={setBookId} 
+        setUpdatedTitle={setUpdatedTitle} 
+        setUpdatedAuthor={setUpdatedAuthor} 
+        setUpdatedGenre={setUpdatedGenre} 
+        updateBook={updateBook} />
+      <ListOfBooks 
+        books={books} 
+        deleteBook={deleteBook} />
       </>
-    )
+      )
   }
 
-/*REVIEW - this needs to be styled with CSS and the components need to be separated. Look up how to do the integrated
-update with CSS (I think it's called modal?) or look up how to do an update form for cSS on youtube */
 
 export default App;
